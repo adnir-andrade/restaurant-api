@@ -1,28 +1,53 @@
-# restaurant-api
+![Ruby](https://img.shields.io/badge/Ruby-3.4.2-red)
+![Rails](https://img.shields.io/badge/Rails-8.0.2-red)
+
+# Restaurant API
 
 A Rails API for managing restaurant menus and menu items, as part of a coding challenge.
 
-# README
+## Features
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+🚧 To be added in future iterations
 
-Things you may want to cover:
+___
 
-* Ruby version
+## Getting Started
 
-* System dependencies
+1. Clone the repo:
+   ```bash
+   git clone git@github.com:adnir-andrade/restaurant-api.git
 
-* Configuration
+2. Install dependencies:
+   ```bash
+   bundle install
 
-* Database creation
+3. Initiate container containing a postgres DB
+   ```bash
+   docker compose up -d
+   ```
 
-* Database initialization
+4. Setup the database
+   ```bash
+   rails db:create db:migrate
+   ```
 
-* How to run the test suite
+___
 
-* Services (job queues, cache servers, search engines, etc.)
+## Commands
 
-* Deployment instructions
+### Lint
 
-* ...
+To run the linter, simply use:
+
+   ```bash
+   bundle exec rubocop
+   ```
+
+### Tests
+
+To run the test suite, use:
+
+   ```bash
+   bundle exec rspec
+   ```
+
