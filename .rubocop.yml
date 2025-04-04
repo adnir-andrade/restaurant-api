@@ -1,6 +1,8 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-rspec
+  - rubocop-factory_bot
+  - rubocop-rspec_rails
 
 AllCops:
   NewCops: enable
@@ -17,3 +19,15 @@ Rails:
 
 RSpec:
   Enabled: true
+
+Layout/IndentationConsistency:
+  Enabled: true
+
+Layout/IndentationWidth:
+  Enabled: true
+
+Layout/HashAlignment:
+  Enabled: true
+
+Style/Documentation:
+  Enabled: false
