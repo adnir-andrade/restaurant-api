@@ -1,0 +1,33 @@
+plugins:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-factory_bot
+  - rubocop-rspec_rails
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.4.2
+  Exclude:
+    - 'bin/**/*'
+    - 'db/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+
+Rails:
+  Enabled: true
+
+RSpec:
+  Enabled: true
+
+Layout/IndentationConsistency:
+  Enabled: true
+
+Layout/IndentationWidth:
+  Enabled: true
+
+Layout/HashAlignment:
+  Enabled: true
+
+Style/Documentation:
+  Enabled: false
