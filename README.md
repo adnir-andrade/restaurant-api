@@ -1,3 +1,4 @@
+![CI](https://github.com/adnir-andrade/restaurant-api/actions/workflows/ci.yml/badge.svg)
 ![Ruby](https://img.shields.io/badge/Ruby-3.4.2-red)
 ![Rails](https://img.shields.io/badge/Rails-8.0.2-red)
 
