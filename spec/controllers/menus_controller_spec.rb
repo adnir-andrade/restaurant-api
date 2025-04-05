@@ -4,13 +4,13 @@ require 'rails_helper'
 
 RSpec.describe MenusController, type: :controller do
   describe 'GET #index' do
+    subject { response }
+
     let!(:menu) { create(:menu) }
 
     before { get :index }
 
-    it 'returns http success' do
-      expect(response).to have_http_status(:ok)
-    end
+    it { is_expected.to have_http_status(:ok) }
 
     it 'returns JSON with array' do
       json = response.parsed_body
@@ -129,12 +129,32 @@ RSpec.describe MenusController, type: :controller do
 
     let!(:menu) { create(:menu) }
 
-    before { delete :destroy, params: { id: menu.id } }
+    context 'when the menu has associated menu_items' do
+      let(:reloaded_menu_item) { MenuItem.find(menu_item.id) }
 
-    it { is_expected.to have_http_status(:no_content) }
+      let!(:menu_item) { create(:menu_item, menu: menu) }
 
-    it 'removes the menu from the database' do
-      expect(Menu).not_to exist(menu.id)
+      before { delete :destroy, params: { id: menu.id } }
+
+      it { is_expected.to have_http_status(:no_content) }
+
+      it 'does not delete the associated menu_items' do
+        expect { reloaded_menu_item }.not_to raise_error
+      end
+
+      it 'nullifies the menu_id in the associated menu_items' do
+        expect(reloaded_menu_item.menu_id).to be_nil
+      end
+    end
+
+    context 'when menu does not have associated menu_items' do
+      before { delete :destroy, params: { id: menu.id } }
+
+      it { is_expected.to have_http_status(:no_content) }
+
+      it 'removes the menu from the database' do
+        expect(Menu).not_to exist(menu.id)
+      end
     end
 
     context 'when menu does not exist' do

@@ -9,16 +9,16 @@ RSpec.describe Menu, type: :model do
     it { is_expected.to be_valid }
 
     context 'when description is empty' do
-      let(:menu) { build(:menu, description: nil) }
+      subject { build(:menu, description: nil) }
 
-      it 'is valid' do
-        expect(menu).to be_valid
-      end
+      it { is_expected.to be_valid }
     end
 
     context 'when attributes are invalid' do
-      it 'is not valid without a name' do
-        expect(build(:menu, name: '')).not_to be_valid
+      context 'when name is empty' do
+        subject { build(:menu, name: '') }
+
+        it { is_expected.not_to be_valid }
       end
     end
   end
