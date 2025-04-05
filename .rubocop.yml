@@ -31,3 +31,15 @@ Layout/HashAlignment:
 
 Style/Documentation:
   Enabled: false
+
+RSpec/NestedGroups:
+  Max: 4
+
+Rails/StrongParametersExpect:
+  Enabled: false
+
+RSpecRails/InferredSpecType:
+  Enabled: false
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
