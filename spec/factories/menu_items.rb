@@ -6,10 +6,6 @@ FactoryBot.define do
     description { Faker::Food.description }
     price { Faker::Number.decimal(l_digits: 2) }
 
-    trait :with_menu do
-      association :menu
-    end
-
     trait :pancake do
       name { 'Pancake' }
       description { 'I miss pancakes...' }
