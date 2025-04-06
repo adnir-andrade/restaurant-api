@@ -12,9 +12,9 @@ RSpec.describe MenuItemsController, type: :controller do
 
     it { is_expected.to have_http_status(:ok) }
 
-    it 'returns JSON with array' do
+    it 'returns serialized content' do
       json = response.parsed_body
-      expect(json).to contain_exactly(serialized_menu_item(menu_item))
+      expect(json).to eq([serialized_menu_item(menu_item)])
     end
   end
 
