@@ -43,3 +43,6 @@ RSpecRails/InferredSpecType:
 
 Naming/MemoizedInstanceVariableName:
   Enabled: false
+
+Rails/I18nLocaleTexts:
+  Enabled: false

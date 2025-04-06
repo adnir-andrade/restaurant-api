@@ -12,9 +12,9 @@ RSpec.describe MenuItemsController, type: :controller do
 
     it { is_expected.to have_http_status(:ok) }
 
-    it 'returns JSON with array' do
+    it 'returns serialized content' do
       json = response.parsed_body
-      expect(json).to contain_exactly(serialized_menu_item(menu_item))
+      expect(json).to eq([serialized_menu_item(menu_item)])
     end
   end
 
@@ -44,7 +44,7 @@ RSpec.describe MenuItemsController, type: :controller do
   describe 'POST #create' do
     subject { response }
 
-    context 'with valid attributes' do
+    context 'when attributes are valid' do
       let(:attributes) { attributes_for(:menu_item) }
 
       before { post :create, params: { menu_item: attributes } }
@@ -56,7 +56,7 @@ RSpec.describe MenuItemsController, type: :controller do
       end
     end
 
-    context 'with invalid attributes' do
+    context 'when attributes are invalid' do
       context 'when name is not present' do
         before { post :create, params: { menu_item: { name: nil } } }
 
@@ -64,6 +64,19 @@ RSpec.describe MenuItemsController, type: :controller do
 
         it 'does not save the item' do
           expect(MenuItem.count).to eq(0)
+        end
+      end
+
+      context 'when name is not unique (case insensitive)' do
+        before do
+          create(:menu_item, name: 'Coffee')
+          post :create, params: { menu_item: { name: 'coFFEe', price: 99.99 } }
+        end
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not save the item' do
+          expect(MenuItem.count).to eq(1)
         end
       end
 
@@ -94,7 +107,7 @@ RSpec.describe MenuItemsController, type: :controller do
 
     let!(:item) { create(:menu_item, :pancake) }
 
-    context 'with valid attributes' do
+    context 'when attributes are valid' do
       before { patch :update, params: { id: item.id, menu_item: { name: 'New Pancake' } } }
 
       it { is_expected.to have_http_status(:ok) }
@@ -104,9 +117,22 @@ RSpec.describe MenuItemsController, type: :controller do
       end
     end
 
-    context 'with invalid attributes' do
+    context 'when attributes are invalid' do
       context 'when name is blank' do
         before { patch :update, params: { id: item.id, menu_item: { name: '' } } }
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not change the name' do
+          expect(item.reload.name).to eq('Pancake')
+        end
+      end
+
+      context 'when name is not unique (case insensitive)' do
+        before do
+          create(:menu_item, name: 'Coffee')
+          patch :update, params: { id: item.id, menu_item: { name: 'coFFEe' } }
+        end
 
         it { is_expected.to have_http_status(:unprocessable_entity) }
 
@@ -169,7 +195,8 @@ RSpec.describe MenuItemsController, type: :controller do
     subject { response }
 
     let!(:menu) { create(:menu) }
-    let!(:menu_item) { create(:menu_item, menu: nil) }
+    let!(:menu_item) { create(:menu_item) }
+    let(:reloaded_menus_list) { menu_item.reload.menus }
 
     context 'when both exist and are valid' do
       before do
@@ -178,22 +205,37 @@ RSpec.describe MenuItemsController, type: :controller do
 
       it { is_expected.to have_http_status(:ok) }
 
-      it 'assigns the item to the menu' do
-        expect(menu_item.reload.menu_id).to eq(menu.id)
+      it 'adds the menu to the menu_item.menus list' do
+        expect(reloaded_menus_list).to include(menu)
       end
 
-      context 'when the item is already assigned to another menu' do
-        let!(:another_menu) { create(:menu) }
+      context 'when the item is already assigned to the same menu' do
+        before do
+          post :assign_to_menu, params: { id: menu_item.id, menu_id: menu.id }
+        end
+
+        it { is_expected.to have_http_status(:conflict) }
+
+        it 'does not duplicate the menu association' do
+          expect(reloaded_menus_list.where(id: menu.id).count).to eq(1)
+        end
+      end
+
+      context 'when the same menu_item is assigned to multiple menus' do
+        let(:another_menu) { create(:menu) }
 
         before do
-          menu_item.menu_id = another_menu.id
-          post :assign_to_menu, params: { id: menu_item.id, menu_id: menu.id }
+          post :assign_to_menu, params: { id: menu_item.id, menu_id: another_menu.id }
         end
 
         it { is_expected.to have_http_status(:ok) }
 
-        it 'assigns the item to the menu' do
-          expect(menu_item.reload.menu_id).to eq(menu.id)
+        it 'adds the menu_item to the second menu' do
+          expect(menu_item.reload.menus).to include(another_menu)
+        end
+
+        it 'does not remove the previous menu association' do
+          expect(menu_item.reload.menus).to include(menu)
         end
       end
     end
