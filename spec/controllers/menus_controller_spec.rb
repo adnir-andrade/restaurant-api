@@ -47,6 +47,36 @@ RSpec.describe MenusController, type: :controller do
     end
   end
 
+  describe 'GET #items' do
+    subject { response }
+
+    context 'when menu exists' do
+      let!(:menu) { create(:menu) }
+
+      before do
+        menu_item1 = create(:menu_item)
+        menu_item2 = create(:menu_item)
+        menu.menu_items << menu_item1
+        menu.menu_items << menu_item2
+        get :items, params: { id: menu.id }
+      end
+
+      it { is_expected.to have_http_status(:ok) }
+
+      it 'returns an array of serialized menu items' do
+        json = response.parsed_body
+        serialized_items = menu.menu_items.map { |item| serialized_menu_item(item) }
+        expect(json).to eq(serialized_items)
+      end
+    end
+
+    context 'when menu does not exist' do
+      before { get :items, params: { id: 'imaginary-id' } }
+
+      it { is_expected.to have_http_status(:not_found) }
+    end
+  end
+
   describe 'POST #create' do
     subject { response }
 

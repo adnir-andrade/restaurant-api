@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MenusController < ApplicationController
-  before_action :set_menu, only: %i[show update destroy]
+  before_action :set_menu, only: %i[show items update destroy]
 
   def index
     menus = Menu.all
@@ -10,6 +10,10 @@ class MenusController < ApplicationController
 
   def show
     render json: @menu
+  end
+
+  def items
+    render json: @menu.menu_items
   end
 
   def create
