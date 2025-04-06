@@ -41,12 +41,11 @@ class MenuItemsController < ApplicationController
       "--- Assigning MenuItem (##{@menu_item.id} - #{@menu_item.name}) to Menu (##{@menu.id} - #{@menu.name}) ---"
     )
 
-    @menu_item.menu = @menu
-
-    if @menu_item.save
-      render json: @menu_item, status: :ok
+    if @menu_item.menus.exists?(@menu.id)
+      render json: { message: 'MenuItem is already assigned to this Menu' }, status: :conflict
     else
-      render json: { errors: @menu_item.errors.full_messages }, status: :unprocessable_entity
+      @menu_item.menus << @menu
+      render json: @menu_item, status: :ok
     end
   end
 
