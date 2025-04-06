@@ -18,9 +18,9 @@ class ImportsController < ApplicationController
     DataConversionTool::RestaurantImporter.import_from_file(@file.tempfile.path)
   end
 
-  def log_errors(e)
-    Rails.logger.error(" ---> [X IMPORT ERROR] #{e.class}: #{e.message}")
-    Rails.logger.error(e.backtrace.join("\n")) if e.backtrace
+  def log_errors(exception)
+    Rails.logger.error(" ---> [X IMPORT ERROR] #{exception.class}: #{exception.message}")
+    Rails.logger.error(exception.backtrace.join("\n")) if exception.backtrace
   end
 
   def uploaded_file

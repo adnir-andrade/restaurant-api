@@ -34,7 +34,9 @@ module DataConversionTool
       end
 
       def unknown_keys_title
-        "\n--- ⚠ Unknown keys found (consider adding them to ALLOWED_ITEM_KEYS in DataConversionTool::Helpers::KeyFinder):"
+        "\n--- ⚠ Unknown keys found " \
+          '(consider adding them to ALLOWED_ITEM_KEYS ' \
+          'in DataConversionTool::Helpers::KeyFinder):'
       end
 
       def unknown_key_item(key)

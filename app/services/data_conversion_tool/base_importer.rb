@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DataConversionTool
   class BaseImporter
     include DataConversionTool::Helpers
@@ -22,8 +24,8 @@ module DataConversionTool
       raise 'Invalid JSON file'
     end
 
-    def self.log_errors(e)
-      Rails.logger.error("JSON parsing failed: #{e.message}")
+    def self.log_errors(exception)
+      Rails.logger.error("JSON parsing failed: #{exception.message}")
     end
 
     # Instance Methods

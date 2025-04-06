@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DataConversionTool
   class RestaurantImporter < BaseImporter
     def import(parsed_json)

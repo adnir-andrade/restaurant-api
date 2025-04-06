@@ -9,28 +9,34 @@ module DataConversionTool
 
     def import(data:)
       menu_name = data['name']
-      return errors << Logs.menu_warning(menu_name, @restaurant.name) if @restaurant.menus.exists?(name: menu_name)
+      return handle_existing_menu(data['name']) if menu_exists?(data['name'])
 
       menu = create_menu(name: menu_name)
-      key = KeyFinder.find(data)
-      return handle_missing_items_key(data.keys) unless key
-
-      items = wrap_in_array(data[key])
-      item_importer = MenuItemImporter.new(
-        menu: menu,
-        logs: logs,
-        errors: errors,
-        skipped_keys: skipped_keys
-      )
-      items.each { |item| item_importer.import(data: item) }
+      items = extract_items_from(data)
+      import_items(menu, items)
     end
 
     private
+
+    def handle_existing_menu(menu_name)
+      errors << Logs.menu_warning(menu_name, @restaurant.name)
+    end
+
+    def menu_exists?(menu_name)
+      @restaurant.menus.exists?(name: menu_name)
+    end
 
     def create_menu(name:)
       menu = @restaurant.menus.create!(name: name)
       logs << Logs.menu_success(name, @restaurant.name)
       menu
+    end
+
+    def extract_items_from(data)
+      key = KeyFinder.find(data)
+      return handle_missing_items_key(data.keys) unless key
+
+      wrap_in_array(data[key])
     end
 
     def handle_missing_items_key(keys)
@@ -40,6 +46,17 @@ module DataConversionTool
 
     def wrap_in_array(value)
       value.is_a?(Array) ? value : [value]
+    end
+
+    def import_items(menu, items)
+      item_importer = MenuItemImporter.new(
+        menu: menu,
+        logs: logs,
+        errors: errors,
+        skipped_keys: skipped_keys
+      )
+
+      items.each { |item| item_importer.import(data: item) }
     end
   end
 end

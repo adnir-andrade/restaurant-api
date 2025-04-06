@@ -8,7 +8,7 @@ module DataConversionTool
       def self.find(data)
         key = ALLOWED_ITEM_KEYS.find { |k| data.key?(k) }
         @unknown_keys ||= Set.new
-        data.keys.each { |k| @unknown_keys << k unless ALLOWED_ITEM_KEYS.include?(k) }
+        data.each_key { |k| @unknown_keys << k unless ALLOWED_ITEM_KEYS.include?(k) }
         key
       end
 
