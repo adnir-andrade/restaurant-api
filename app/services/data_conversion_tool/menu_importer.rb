@@ -2,6 +2,8 @@
 
 module DataConversionTool
   class MenuImporter < BaseImporter
+    ALLOWED_ITEM_KEYS = %w[menu_items items dishes pratos plats].freeze
+
     def initialize(restaurant:, logs: nil, errors: nil, skipped_keys: nil)
       super(logs: logs, errors: errors, skipped_keys: skipped_keys)
       @restaurant = restaurant
@@ -13,7 +15,7 @@ module DataConversionTool
 
       menu = create_menu(name: menu_name)
       items = extract_items_from(data)
-      import_items(menu, items)
+      import_items(menu, items) if items
     end
 
     private
@@ -33,15 +35,20 @@ module DataConversionTool
     end
 
     def extract_items_from(data)
-      key = KeyFinder.find(data)
-      return handle_missing_items_key(data.keys) unless key
+      item_key = data.keys.find { |key| self.class::ALLOWED_ITEM_KEYS.include?(key) }
 
-      wrap_in_array(data[key])
+      return handle_missing_items_key(data.keys, data['name']) unless item_key
+
+      wrap_in_array(data[item_key])
     end
 
-    def handle_missing_items_key(keys)
-      errors << Logs.missing_items_key_error
-      skipped_keys.merge(keys - KeyFinder::ALLOWED_ITEM_KEYS)
+    def handle_missing_items_key(all_keys, menu_name)
+      unknown_keys = all_keys - self.class::ALLOWED_ITEM_KEYS - %w[name]
+
+      errors << Logs.missing_items_key_error(@restaurant.name, menu_name, all_keys)
+
+      skipped_keys.merge(unknown_keys)
+      []
     end
 
     def wrap_in_array(value)

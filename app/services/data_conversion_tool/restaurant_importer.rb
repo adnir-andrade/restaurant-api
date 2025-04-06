@@ -2,6 +2,8 @@
 
 module DataConversionTool
   class RestaurantImporter < BaseImporter
+    ALLOWED_KEYS = %w[name menus].freeze
+
     def import(parsed_json)
       restaurants = parsed_json['restaurants']
       return logs unless restaurants.is_a?(Array)
@@ -14,6 +16,8 @@ module DataConversionTool
     private
 
     def import_restaurant(data:)
+      handle_unexpected_keys(data)
+
       restaurant = create_restaurant(name: data['name'])
       menus = data['menus'] || []
 
@@ -25,6 +29,11 @@ module DataConversionTool
       )
 
       menus.each { |menu_data| menu_importer.import(data: menu_data) }
+    end
+
+    def handle_unexpected_keys(data)
+      KeyFinder.find(data, allowed_keys: ALLOWED_KEYS)
+      skipped_keys.merge(KeyFinder.unknown_keys)
     end
 
     def create_restaurant(name:)

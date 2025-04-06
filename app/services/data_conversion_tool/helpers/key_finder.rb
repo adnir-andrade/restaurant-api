@@ -3,12 +3,10 @@
 module DataConversionTool
   module Helpers
     module KeyFinder
-      ALLOWED_ITEM_KEYS = %w[menu_items dishes items pratos plats].freeze
-
-      def self.find(data)
-        key = ALLOWED_ITEM_KEYS.find { |k| data.key?(k) }
+      def self.find(data, allowed_keys:)
+        key = allowed_keys.find { |k| data.key?(k) }
         @unknown_keys ||= Set.new
-        data.each_key { |k| @unknown_keys << k unless ALLOWED_ITEM_KEYS.include?(k) }
+        data.each_key { |k| @unknown_keys << k unless allowed_keys.include?(k) }
         key
       end
 
