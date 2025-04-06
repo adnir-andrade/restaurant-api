@@ -20,6 +20,14 @@ RSpec.describe Menu, type: :model do
 
         it { is_expected.not_to be_valid }
       end
+
+      context 'when name is duplicated within the same restaurant' do
+        subject { build(:menu, name: 'Italian food', restaurant: existing_menu.restaurant) }
+
+        let!(:existing_menu) { create(:menu, name: 'Italian food', restaurant: build(:restaurant)) }
+
+        it { is_expected.not_to be_valid }
+      end
     end
   end
 end
