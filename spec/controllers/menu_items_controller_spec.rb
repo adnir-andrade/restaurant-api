@@ -169,7 +169,8 @@ RSpec.describe MenuItemsController, type: :controller do
     subject { response }
 
     let!(:menu) { create(:menu) }
-    let!(:menu_item) { create(:menu_item, menu: nil) }
+    let!(:menu_item) { create(:menu_item) }
+    let(:reloaded_menus_list) { menu_item.reload.menus }
 
     context 'when both exist and are valid' do
       before do
@@ -178,22 +179,19 @@ RSpec.describe MenuItemsController, type: :controller do
 
       it { is_expected.to have_http_status(:ok) }
 
-      it 'assigns the item to the menu' do
-        expect(menu_item.reload.menu_id).to eq(menu.id)
+      it 'adds the menu to the menu_item.menus list' do
+        expect(reloaded_menus_list).to include(menu)
       end
 
-      context 'when the item is already assigned to another menu' do
-        let!(:another_menu) { create(:menu) }
-
+      context 'when the item is already assigned to the same menu' do
         before do
-          menu_item.menu_id = another_menu.id
           post :assign_to_menu, params: { id: menu_item.id, menu_id: menu.id }
         end
 
-        it { is_expected.to have_http_status(:ok) }
+        it { is_expected.to have_http_status(:conflict) }
 
-        it 'assigns the item to the menu' do
-          expect(menu_item.reload.menu_id).to eq(menu.id)
+        it 'does not duplicate the menu association' do
+          expect(reloaded_menus_list.where(id: menu.id).count).to eq(1)
         end
       end
     end

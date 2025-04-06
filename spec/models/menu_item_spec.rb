@@ -9,7 +9,7 @@ RSpec.describe MenuItem, type: :model do
     it { is_expected.to be_valid }
 
     context 'when menu is not associated' do
-      subject { build(:menu_item, menu: nil) }
+      subject { build(:menu_item) }
 
       it { is_expected.to be_valid }
     end

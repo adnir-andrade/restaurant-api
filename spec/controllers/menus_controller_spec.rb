@@ -132,7 +132,7 @@ RSpec.describe MenusController, type: :controller do
     context 'when the menu has associated menu_items' do
       let(:reloaded_menu_item) { MenuItem.find(menu_item.id) }
 
-      let!(:menu_item) { create(:menu_item, menu: menu) }
+      let!(:menu_item) { create(:menu_item) }
 
       before { delete :destroy, params: { id: menu.id } }
 
@@ -142,8 +142,8 @@ RSpec.describe MenusController, type: :controller do
         expect { reloaded_menu_item }.not_to raise_error
       end
 
-      it 'nullifies the menu_id in the associated menu_items' do
-        expect(reloaded_menu_item.menu_id).to be_nil
+      it 'removes the menu from menu_item.menus list' do
+        expect(reloaded_menu_item.menus).not_to include(menu)
       end
     end
 
