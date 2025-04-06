@@ -220,6 +220,24 @@ RSpec.describe MenuItemsController, type: :controller do
           expect(reloaded_menus_list.where(id: menu.id).count).to eq(1)
         end
       end
+
+      context 'when the same menu_item is assigned to multiple menus' do
+        let(:another_menu) { create(:menu) }
+
+        before do
+          post :assign_to_menu, params: { id: menu_item.id, menu_id: another_menu.id }
+        end
+
+        it { is_expected.to have_http_status(:ok) }
+
+        it 'adds the menu_item to the second menu' do
+          expect(menu_item.reload.menus).to include(another_menu)
+        end
+
+        it 'does not remove the previous menu association' do
+          expect(menu_item.reload.menus).to include(menu)
+        end
+      end
     end
 
     context 'when menu_item does not exist' do
