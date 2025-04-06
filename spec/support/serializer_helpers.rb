@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 module SerializerHelpers
+  def serialized_restaurant(restaurant)
+    {
+      id: restaurant.id,
+      name: restaurant.name,
+      menus: restaurant.menus.map { |menu| serialized_menu(menu) }
+    }.as_json
+  end
+
   def serialized_menu(menu)
     {
       id: menu.id,
