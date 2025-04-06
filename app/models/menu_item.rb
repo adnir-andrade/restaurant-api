@@ -4,5 +4,6 @@ class MenuItem < ApplicationRecord
   validates :name, presence: true
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
 
-  belongs_to :menu, optional: true
+  has_many :menu_entries, dependent: :destroy
+  has_many :menus, through: :menu_entries
 end
