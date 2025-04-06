@@ -80,8 +80,10 @@ RSpec.describe MenusController, type: :controller do
   describe 'POST #create' do
     subject { response }
 
+    let(:restaurant) { create(:restaurant) }
+
     context 'when attributes are valid' do
-      let(:menu_attributes) { attributes_for(:menu) }
+      let(:menu_attributes) { attributes_for(:menu).merge(restaurant_id: restaurant.id) }
 
       before { post :create, params: { menu: menu_attributes } }
 
@@ -94,14 +96,45 @@ RSpec.describe MenusController, type: :controller do
     end
 
     context 'when attributes are invalid' do
-      let(:menu_attributes) { attributes_for(:menu, name: nil) }
+      context 'when restaurant does not exist' do
+        let(:invalid_restaurant_id) { 'imaginary-id' }
 
-      before { post :create, params: { menu: menu_attributes } }
+        let(:menu_attributes) { attributes_for(:menu).merge(restaurant_id: invalid_restaurant_id) }
 
-      it { is_expected.to have_http_status(:unprocessable_entity) }
+        before { post :create, params: { menu: menu_attributes } }
 
-      it 'does not save the menu' do
-        expect(Menu.count).to eq(0)
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not create a menu' do
+          expect(Menu.count).to eq(0)
+        end
+      end
+
+      context 'when name is duplicated within the same restaurant' do
+        let(:menu_attributes) { attributes_for(:menu, name: 'Menu A').merge(restaurant_id: restaurant.id) }
+
+        before do
+          create(:menu, name: 'Menu A', restaurant: restaurant)
+          post :create, params: { menu: menu_attributes }
+        end
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not create a menu' do
+          expect(Menu.count).to eq(1)
+        end
+      end
+
+      context 'when name is missing' do
+        let(:menu_attributes) { attributes_for(:menu, name: nil).merge(restaurant_id: restaurant.id) }
+
+        before { post :create, params: { menu: menu_attributes } }
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not save the menu' do
+          expect(Menu.count).to eq(0)
+        end
       end
     end
   end
@@ -133,17 +166,61 @@ RSpec.describe MenusController, type: :controller do
           expect(json).to eq(serialized_menu(Menu.last))
         end
       end
+
+      context 'when updating restaurant_id' do
+        let!(:new_restaurant) { create(:restaurant) }
+
+        before do
+          patch :update, params: { id: pizza_menu.id, menu: { restaurant_id: new_restaurant.id } }
+        end
+
+        it { is_expected.to have_http_status(:ok) }
+
+        it 'updates the restaurant_id' do
+          expect(pizza_menu.reload.restaurant_id).to eq(new_restaurant.id)
+        end
+      end
     end
 
     context 'when attributes are invalid' do
       let!(:pizza_menu) { create(:menu, :pizza) }
 
-      before { patch :update, params: { id: pizza_menu.id, menu: { name: '' } } }
+      context 'when name is missing' do
+        before { patch :update, params: { id: pizza_menu.id, menu: { name: '' } } }
 
-      it { is_expected.to have_http_status(:unprocessable_entity) }
+        it { is_expected.to have_http_status(:unprocessable_entity) }
 
-      it 'does not change name' do
-        expect(Menu.last.name).to eq('Pizzas')
+        it 'does not change name' do
+          expect(Menu.last.name).to eq('Pizzas')
+        end
+      end
+
+      context 'when name is duplicated within the same restaurant' do
+        before do
+          create(:menu, name: 'Italian food', restaurant: pizza_menu.restaurant)
+          patch :update, params: { id: pizza_menu.id, menu: { name: 'Italian food' } }
+        end
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not change the name' do
+          expect(pizza_menu.reload.name).to eq('Pizzas')
+        end
+      end
+
+      context 'when updating restaurant_id and name becomes duplicated' do
+        let!(:new_restaurant) { create(:restaurant) }
+
+        before do
+          create(:menu, name: 'Pizzas', restaurant: new_restaurant)
+          patch :update, params: { id: pizza_menu.id, menu: { restaurant_id: new_restaurant.id } }
+        end
+
+        it { is_expected.to have_http_status(:unprocessable_entity) }
+
+        it 'does not change the restaurant_id' do
+          expect(pizza_menu.reload.restaurant_id).not_to eq(new_restaurant.id)
+        end
       end
     end
 
