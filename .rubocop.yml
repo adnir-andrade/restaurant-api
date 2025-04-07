@@ -49,3 +49,6 @@ Rails/I18nLocaleTexts:
 
 Metrics/MethodLength:
   Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
