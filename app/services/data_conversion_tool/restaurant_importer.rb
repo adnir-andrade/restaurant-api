@@ -9,15 +9,8 @@ module DataConversionTool
       return { errors: @errors, logs: @logs } if restaurants.empty?
 
       restaurants.each { |restaurant_data| import_restaurant(data: restaurant_data) }
-      summarize_logs
 
-      {
-        created_records: @created_records,
-        skipped_records: @skipped_records,
-        errors: @errors,
-        skipped_keys: @skipped_keys,
-        logs: @logs
-      }
+      summarize_result
     end
 
     private
@@ -69,6 +62,17 @@ module DataConversionTool
     rescue StandardError => e
       @errors << Logs.restaurant_creation_exception(name, e.message)
       nil
+    end
+
+    def summarize_result
+      summarize_logs
+      {
+        created_records: @created_records,
+        skipped_records: @skipped_records,
+        errors: @errors,
+        skipped_keys: @skipped_keys,
+        logs: @logs
+      }
     end
   end
 end
