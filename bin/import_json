@@ -2,10 +2,26 @@
 
 require_relative '../config/environment'
 
+BLUE = "\e[34m"
 GREEN = "\e[32m"
-YELLOW = "\e[33m"
 RED = "\e[31m"
+YELLOW = "\e[33m"
 RESET = "\e[0m"
+
+if ARGV.include?('-h') || ARGV.include?('--help')
+  puts <<~HELP
+    #{YELLOW}Usage: bin/import_json path/to/file.json#{RESET}
+
+    Imports restaurants, menus, and menu items from a JSON file.
+
+    Options:
+      -h, --help        Show this help message
+
+    Example:
+      bin/import_json spec/fixtures/files/sample.json
+  HELP
+  exit(0)
+end
 
 if ARGV.empty?
   puts "#{YELLOW}Usage: bin/import_json path/to/file.json#{RESET}"
@@ -25,7 +41,7 @@ begin
     exit(1)
   end
 
-  puts "\n#{GREEN}✓ Import completed!"
+  puts "\n#{BLUE}!Import completed!"
   puts "#{GREEN}✓ Created:"
   result[:created_records].each { | key, value | puts "  - #{key}: #{value}" }
 
@@ -37,6 +53,23 @@ begin
   if result[:errors].any?
     puts "\n#{RED}X Errors:"
     result[:errors].each { | error | puts "  - #{error}" }
+  end
+
+  if result[:logs]&.any?
+    puts "\n#{BLUE}-- Logs --"
+    result[:logs].each do | log |
+      colored_log =
+        if log.include?("[✓ SUCCESS]")
+          "#{GREEN}#{log}#{RESET}"
+        elsif log.include?("[⚠ WARNING]")
+          "#{YELLOW}#{log}#{RESET}"
+        elsif log.include?("[X ERROR]")
+          "#{RED}#{log}#{RESET}"
+        else
+          log
+        end
+      puts "  #{colored_log}"
+    end
   end
 rescue => e
   puts "\n#{RED}! Import failed: #{e.message}#{RESET}"
