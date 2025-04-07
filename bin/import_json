@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/environment'
+
+GREEN = "\e[32m"
+YELLOW = "\e[33m"
+RED = "\e[31m"
+RESET = "\e[0m"
+
+if ARGV.empty?
+  puts "#{YELLOW}Usage: bin/import_json path/to/file.json#{RESET}"
+  exit(1)
+end
+
+file_path = ARGV.first
+
+begin
+  data = DataConversionTool::BaseImporter.parse_json(file_path)
+  result = DataConversionTool::RestaurantImporter.new.import(data)
+
+  unless result[:created_records]
+    puts "\n#{RED}! Import failed:"
+    result[:errors].each { | error | puts "  - #{error}" }
+    puts "#{RESET}"
+    exit(1)
+  end
+
+  puts "\n#{GREEN}✓ Import completed!"
+  puts "#{GREEN}✓ Created:"
+  result[:created_records].each { | key, value | puts "  - #{key}: #{value}" }
+
+  if result[:skipped_records].any?
+    puts "\n#{YELLOW}⚠ Skipped:"
+    result[:skipped_records].each { | key, value | puts "  - #{key}: #{value}" }
+  end
+
+  if result[:errors].any?
+    puts "\n#{RED}X Errors:"
+    result[:errors].each { | error | puts "  - #{error}" }
+  end
+rescue => e
+  puts "\n#{RED}! Import failed: #{e.message}#{RESET}"
+end
