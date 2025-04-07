@@ -4,9 +4,19 @@ class ImportsController < ApplicationController
   before_action :uploaded_file, only: %i[create]
 
   def create
-    logs = import_from_file
+    response = import_from_file
 
-    render json: { logs: logs, status: 'success' }, status: :ok
+    if response[:created_records].blank?
+      return render json: { **response, status: 'Failed' },
+                    status: :bad_request
+    end
+
+    if response[:errors].any?
+      return render json: { **response, status: 'Partially successful' },
+                    status: :multi_status
+    end
+
+    render json: { **response, status: 'Success' }, status: :ok
   rescue StandardError => e
     log_errors(e)
     render json: { error: e.message }, status: :unprocessable_entity
