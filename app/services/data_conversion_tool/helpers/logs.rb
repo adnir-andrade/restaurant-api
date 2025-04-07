@@ -9,6 +9,14 @@ module DataConversionTool
         "[✓ SUCCESS] Restaurant '#{name}' imported"
       end
 
+      def restaurant_creation_failed(name, errors)
+        "[X ERROR]️ Failed to create restaurant '#{name}': #{errors}"
+      end
+
+      def restaurant_creation_exception(name, exception)
+        "[X ERROR]️ Unexpected error creating restaurant '#{name}': #{exception}"
+      end
+
       def menu_success(name, restaurant_name)
         "  [✓ SUCCESS] Menu '#{name}' added to '#{restaurant_name}'"
       end
@@ -17,8 +25,12 @@ module DataConversionTool
         "[⚠ WARNING]️ Menu '#{name}' already exists for restaurant '#{restaurant_name}', skipping..."
       end
 
-      def missing_items_key_error(menu_name)
-        "[X ERROR]️ No valid items key found in menu '#{menu_name}'"
+      def self.missing_restaurants_key_error(available_keys)
+        "[X ERROR]️ Missing required root key: 'restaurants'. Please make sure your JSON has one of the following as a top-level key: #{available_keys.join(', ')}"
+      end
+
+      def self.missing_items_key_error(restaurant_name, menu_name, available_keys)
+        "[X ERROR]️ No valid items key found in restaurant '#{restaurant_name}' menu '#{menu_name}'. Available keys: #{available_keys.join(', ')}"
       end
 
       def duplicate_item_warning(name, new_name)
@@ -30,11 +42,11 @@ module DataConversionTool
       end
 
       def summarize_warnings_title
-        "\n--- Import completed with warnings: ---"
+        '--- Import completed with warnings: ---'
       end
 
       def unknown_keys_title
-        "\n--- ⚠ Unknown keys found " \
+        '--- ⚠ Unknown keys found ' \
           '(consider adding them to ALLOWED_ITEM_KEYS ' \
           'in DataConversionTool::Helpers::KeyFinder):'
       end
