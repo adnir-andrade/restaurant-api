@@ -52,3 +52,11 @@ Metrics/MethodLength:
 
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
+
+RSpec/ExampleLength:
+  Exclude:
+    - 'spec/services/data_conversion_tool/**/*_spec.rb'
+
+RSpec/MultipleExpectations:
+  Exclude:
+    - 'spec/services/data_conversion_tool/**/*_spec.rb'
