@@ -4,8 +4,8 @@ module DataConversionTool
   class MenuImporter < BaseImporter
     ALLOWED_ITEM_KEYS = %w[menu_items items dishes pratos plats].freeze
 
-    def initialize(restaurant:, created_records: nil, skipped_records: nil, logs: nil, errors: nil, skipped_keys: nil)
-      super(logs: logs, created_records: created_records, skipped_records: skipped_records, errors: errors, skipped_keys: skipped_keys)
+    def initialize(restaurant:, **)
+      super(**)
       @restaurant = restaurant
     end
 
@@ -34,18 +34,29 @@ module DataConversionTool
       menu = @restaurant.menus.new(name: name)
 
       if menu.save
-        @logs << Logs.menu_success(name, @restaurant.name)
-        @created_records[:menus] += 1
-        return menu
+        handle_menu_success(menu)
       else
-        @errors << Logs.menu_creation_failed(name, @restaurant.name, menu.errors.full_messages.to_sentence)
-        @skipped_records[:menus] += 1
+        handle_menu_failure(menu)
       end
 
-      nil
+      menu
     rescue StandardError => e
-      @errors << Logs.menu_creation_exception(name, @restaurant.name, e.message)
+      handle_menu_exception(name, e)
       nil
+    end
+
+    def handle_menu_success(menu)
+      @logs << Logs.menu_success(menu.name, @restaurant.name)
+      @created_records[:menus] += 1
+    end
+
+    def handle_menu_failure(menu)
+      @errors << Logs.menu_creation_failed(menu.name, @restaurant.name, menu.errors.full_messages.to_sentence)
+      @skipped_records[:menus] += 1
+    end
+
+    def handle_menu_exception(name, error)
+      @errors << Logs.menu_creation_exception(name, @restaurant.name, error.message)
     end
 
     def extract_items_from(data)

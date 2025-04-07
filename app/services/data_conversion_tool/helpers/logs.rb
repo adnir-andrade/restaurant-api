@@ -34,11 +34,14 @@ module DataConversionTool
       end
 
       def self.missing_restaurants_key_error(available_keys)
-        "[X ERROR]️ Missing required root key: 'restaurants'. Please make sure your JSON has one of the following as a top-level key: #{available_keys.join(', ')}"
+        "[X ERROR]️ Missing required root key: 'restaurants'." \
+          'Please make sure your JSON has one of the following as a top-level key:' \
+          "#{available_keys.join(', ')}"
       end
 
       def self.missing_items_key_error(restaurant_name, menu_name, available_keys)
-        "[X ERROR]️ No valid items key found in restaurant '#{restaurant_name}' menu '#{menu_name}'. Available keys: #{available_keys.join(', ')}"
+        "[X ERROR]️ No valid items key found in restaurant '#{restaurant_name}' menu '#{menu_name}'." \
+          "Available keys: #{available_keys.join(', ')}"
       end
 
       def duplicate_item_warning(name, new_name)

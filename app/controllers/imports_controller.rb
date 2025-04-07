@@ -1,22 +1,18 @@
 # frozen_string_literal: true
 
 class ImportsController < ApplicationController
-  before_action :uploaded_file, only: %i[create]
+  before_action :set_uploaded_file, only: %i[create]
 
   def create
     response = import_from_file
 
-    if response[:created_records].blank?
-      return render json: { **response, status: 'Failed' },
-                    status: :bad_request
-    end
+    return render json: { **response, status: 'Failed' }, status: :bad_request if response[:created_records].blank?
 
-    if response[:errors].any?
-      return render json: { **response, status: 'Partially successful' },
-                    status: :multi_status
-    end
+    return render json: { **response, status: 'Partially successful' }, status: :multi_status if response[:errors].any?
 
     render json: { **response, status: 'Success' }, status: :ok
+  rescue ActionController::ParameterMissing => e
+    render json: { error: e.message }, status: :bad_request
   rescue StandardError => e
     log_errors(e)
     render json: { error: e.message }, status: :unprocessable_entity
@@ -33,7 +29,7 @@ class ImportsController < ApplicationController
     Rails.logger.error(exception.backtrace.join("\n")) if exception.backtrace
   end
 
-  def uploaded_file
+  def set_uploaded_file
     @file = params.require(:file)
   end
 end

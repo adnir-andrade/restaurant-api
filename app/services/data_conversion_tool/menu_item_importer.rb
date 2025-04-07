@@ -2,8 +2,8 @@
 
 module DataConversionTool
   class MenuItemImporter < BaseImporter
-    def initialize(menu:, created_records: nil, skipped_records: nil, logs: nil, errors: nil, skipped_keys: nil)
-      super(logs: logs, created_records: created_records, skipped_records: skipped_records, errors: errors, skipped_keys: skipped_keys)
+    def initialize(menu:, **)
+      super(**)
       @menu = menu
     end
 
@@ -28,9 +28,11 @@ module DataConversionTool
     private
 
     def create_item(name:, price:)
-      item = @menu.menu_items.new(name: name, price: price)
+      item = MenuItem.new(name: name, price: price)
 
       if item.save
+        MenuEntry.create!(menu: @menu, menu_item: item)
+
         yield if block_given?
         return item
       else
