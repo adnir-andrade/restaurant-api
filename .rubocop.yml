@@ -46,3 +46,6 @@ Naming/MemoizedInstanceVariableName:
 
 Rails/I18nLocaleTexts:
   Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
