@@ -5,6 +5,26 @@
 # Restaurant API
 
 A Rails API for managing restaurant menus and menu items, as part of a coding challenge.
+___
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Setup Instructions](#getting-started)
+- [Commands](#commands)
+- [Endpoints](#endpoints)
+    - [Import](#import)
+    - [Restaurants](#restaurants)
+    - [Menus](#menus)
+    - [MenuItems](#menuitems)
+- [JSON Format to Import Files](#json-format-to-import-files)
+    - [Example JSON Structure](#example-json-structure)
+    - [Required Fields](#required-fields)
+    - [Limitations](#limitations)
+- [Decision Log (Notion)](#decision-making-log-notion)
+
+___
 
 ## Features
 
@@ -40,6 +60,16 @@ A Rails API for managing restaurant menus and menu items, as part of a coding ch
     - Command-line script offers options for silent mode (which suppresses logs) and logs-only mode (which only prints
       the logs).
     - More and more tests!
+
+___
+
+## Requirements
+
+To run this project, you need the following tools installed:
+
+- [Ruby 3.2.4](https://www.ruby-lang.org/en/documentation/installation/)
+- [Rails 8.0.2](https://guides.rubyonrails.org/getting_started.html)
+- [Docker with Compose](https://docs.docker.com/compose/install/)
 
 ___
 
@@ -108,8 +138,6 @@ To run the test suite, use:
    ```
 
 ___
-
----
 
 ## Endpoints
 
@@ -214,3 +242,14 @@ for each level:
   in a skipped record.
 - **Nested Structures:** The JSON structure must adhere to the hierarchy of restaurants → menus → menu items. Each level
   must be nested correctly; otherwise, the import will fail.
+
+___
+
+## Decision Making Log (Notion)
+
+Here is the link to a summary of the decision-making process during this challenge, documented in Notion.
+
+Some of these thoughts are also written in the project's pull requests, which have not been deleted and can still be
+read there.
+
+[Decision Log on Notion](https://haotran.notion.site/Decision-Making-Restaurant-API-1ceef206b2be80ff8284fb21357f525a?pvs=4)
