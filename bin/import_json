@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require_relative '../config/environment'
+
+BLUE = "\e[34m"
+GREEN = "\e[32m"
+RED = "\e[31m"
+YELLOW = "\e[33m"
+RESET = "\e[0m"
+
+silent_mode = ARGV.include?('--silent')
+logs_only_mode = ARGV.include?('--logs-only')
+
+if ARGV.include?('-h') || ARGV.include?('--help')
+  puts <<~HELP
+    #{BLUE}Usage: bin/import_json path/to/file.json [options]#{RESET}
+
+    Imports restaurants, menus, and menu items from a JSON file.
+
+    Options:
+      -h, --help        Show this help message
+      --silent          Run in silent mode (no logs, just basic output)
+      --logs-only       Print only the logs
+
+    Example:
+      bin/import_json spec/fixtures/files/sample.json
+      bin/import_json spec/fixtures/files/sample.json --silent
+      bin/import_json spec/fixtures/files/sample.json --logs-only
+  HELP
+  exit(0)
+end
+
+if ARGV.empty?
+  puts "#{YELLOW}Usage: bin/import_json path/to/file.json#{RESET}"
+  exit(1)
+end
+
+file_path = ARGV.first
+
+begin
+  data = DataConversionTool::BaseImporter.parse_json(file_path)
+  result = DataConversionTool::RestaurantImporter.new.import(data)
+
+  unless result[:created_records]
+    puts "\n#{RED}! Import failed:"
+    result[:errors].each { | error | puts "  - #{error}" }
+    puts "#{RESET}"
+    exit(1)
+  end
+
+  puts "\n#{BLUE}!Import completed!"
+  unless logs_only_mode
+    puts "#{GREEN}✓ Created:"
+    result[:created_records].each { | key, value | puts "  - #{key}: #{value}" }
+
+    if result[:skipped_records].any?
+      puts "\n#{YELLOW}⚠ Skipped:"
+      result[:skipped_records].each { | key, value | puts "  - #{key}: #{value}" }
+    end
+
+    if result[:errors].any?
+      puts "\n#{RED}X Errors:"
+      result[:errors].each { | error | puts "  - #{error}" }
+    end
+  end
+
+  unless silent_mode
+    if result[:logs]&.any?
+      puts "\n#{BLUE}-- Logs --"
+      result[:logs].each do | log |
+        colored_log =
+          if log.include?("[✓ SUCCESS]")
+            "#{GREEN}#{log}#{RESET}"
+          elsif log.include?("[⚠ WARNING]")
+            "#{YELLOW}#{log}#{RESET}"
+          elsif log.include?("[X ERROR]")
+            "#{RED}#{log}#{RESET}"
+          else
+            log
+          end
+        puts "  #{colored_log}"
+      end
+    end
+  end
+rescue => e
+  puts "\n#{RED}! Import failed: #{e.message}#{RESET}"
+end
