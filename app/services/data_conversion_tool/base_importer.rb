@@ -14,7 +14,8 @@ module DataConversionTool
       @created_records = created_records || {
         restaurants: 0,
         menus: 0,
-        items: 0
+        items: 0,
+        duplicated_items: 0
       }
 
       @skipped_records = skipped_records || {
