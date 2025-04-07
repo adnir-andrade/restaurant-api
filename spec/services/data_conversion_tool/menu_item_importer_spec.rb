@@ -144,5 +144,30 @@ RSpec.describe DataConversionTool::MenuItemImporter do
         expect(menu.menu_items.count).to eq(0)
       end
     end
+
+    context 'when menu is nil (orphan menu item)' do
+      let(:importer) do
+        described_class.new(
+          menu: nil,
+          created_records: created_records,
+          skipped_records: skipped_records,
+          logs: logs,
+          errors: errors,
+          skipped_keys: skipped_keys
+        )
+      end
+
+      let(:data) { { 'name' => 'Orphan Item', 'price' => 9.99 } }
+
+      it 'does not raise an error and logs orphan menu item' do
+        expect { importer.import(data: data) }.not_to raise_error
+
+        expect(errors).to include(
+          a_string_matching(/MenuItem 'Orphan Item'.*menu was missing/)
+        )
+
+        expect(skipped_records[:items]).to eq(1)
+      end
+    end
   end
 end

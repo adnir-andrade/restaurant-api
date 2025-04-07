@@ -60,6 +60,10 @@ module DataConversionTool
         "[X ERROR]️ Unexpected error creating MenuItem '#{name}' (#{price}): #{exception}"
       end
 
+      def self.orphan_menu_item(name, price)
+        "[X ERROR]️ MenuItem '#{name}' (#{price}) could not be created because its menu was missing"
+      end
+
       def summarize_warnings_title
         '--- Import completed with warnings: ---'
       end

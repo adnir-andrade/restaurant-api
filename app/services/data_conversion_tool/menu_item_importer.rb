@@ -8,24 +8,39 @@ module DataConversionTool
     end
 
     def import(data:)
+      return handle_orphan_item(data) unless @menu&.persisted?
+
       name = data['name']
       price = data['price']
 
       if MenuItem.exists?(name: name)
-        new_name = "#{name} (duplicate #{SecureRandom.hex(3)})"
-        create_item(name: new_name, price: price) do
-          @created_records[:duplicated_items] += 1
-          logs << Logs.duplicate_item_warning(name, new_name)
-        end
+        import_duplicate_item(name, price)
       else
-        create_item(name: name, price: price) do
-          @created_records[:items] += 1
-          logs << Logs.menu_item_success(name)
-        end
+        import_unique_item(name, price)
       end
     end
 
     private
+
+    def handle_orphan_item(data)
+      @errors << Logs.orphan_menu_item(data['name'], data['price'])
+      @skipped_records[:items] += 1
+    end
+
+    def import_duplicate_item(name, price)
+      new_name = "#{name} (duplicate #{SecureRandom.hex(3)})"
+      create_item(name: new_name, price: price) do
+        @created_records[:duplicated_items] += 1
+        logs << Logs.duplicate_item_warning(name, new_name)
+      end
+    end
+
+    def import_unique_item(name, price)
+      create_item(name: name, price: price) do
+        @created_records[:items] += 1
+        logs << Logs.menu_item_success(name)
+      end
+    end
 
     def create_item(name:, price:)
       item = MenuItem.new(name: name, price: price)
