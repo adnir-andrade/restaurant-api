@@ -6,10 +6,22 @@ module DataConversionTool
 
     attr_reader :logs, :errors, :skipped_keys
 
-    def initialize(logs: nil, errors: nil, skipped_keys: nil)
+    def initialize(logs: nil, errors: nil, skipped_keys: nil, created_records: nil, skipped_records: nil)
       @logs = logs || []
       @errors = errors || []
       @skipped_keys = skipped_keys || Set.new
+
+      @created_records = created_records || {
+        restaurants: 0,
+        menus: 0,
+        items: 0
+      }
+
+      @skipped_records = skipped_records || {
+        restaurants: 0,
+        menus: 0,
+        items: 0
+      }
     end
 
     def self.import_from_file(file_path)
