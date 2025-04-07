@@ -25,6 +25,14 @@ module DataConversionTool
         "[⚠ WARNING]️ Menu '#{name}' already exists for restaurant '#{restaurant_name}', skipping..."
       end
 
+      def menu_creation_failed(menu_name, restaurant_name, errors)
+        "[X ERROR]️ Failed to create menu '#{menu_name}' for restaurant '#{restaurant_name}': #{errors}"
+      end
+
+      def menu_creation_exception(menu_name, restaurant_name, exception)
+        "[X ERROR]️ Unexpected error creating menu '#{menu_name}' for restaurant '#{restaurant_name}': #{exception}"
+      end
+
       def self.missing_restaurants_key_error(available_keys)
         "[X ERROR]️ Missing required root key: 'restaurants'. Please make sure your JSON has one of the following as a top-level key: #{available_keys.join(', ')}"
       end
@@ -39,6 +47,14 @@ module DataConversionTool
 
       def menu_item_success(name)
         "    [✓ SUCCESS] MenuItem '#{name}' added"
+      end
+
+      def menu_item_creation_failed(name, price, errors)
+        "[X ERROR]️ Failed to create MenuItem '#{name}' (#{price}): #{errors}"
+      end
+
+      def menu_item_creation_exception(name, price, exception)
+        "[X ERROR]️ Unexpected error creating MenuItem '#{name}' (#{price}): #{exception}"
       end
 
       def summarize_warnings_title
