@@ -74,10 +74,12 @@ RSpec.describe DataConversionTool::RestaurantImporter do
       end
 
       it 'delegates menu import to MenuImporter' do
-        expect_any_instance_of(DataConversionTool::MenuImporter).to receive(:import)
-          .with(data: { 'name' => 'Lunch', 'items' => [] })
+        spy = instance_spy(DataConversionTool::MenuImporter)
+        allow(DataConversionTool::MenuImporter).to receive(:new).and_return(spy)
 
         importer.import(json)
+
+        expect(spy).to have_received(:import).with(data: { 'name' => 'Lunch', 'items' => [] })
       end
     end
 

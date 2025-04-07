@@ -54,8 +54,11 @@ RSpec.describe DataConversionTool::MenuImporter do
       it 'persists the menu item with correct attributes' do
         import
         menu_item = restaurant.menus.first.menu_items.first
-        expect(menu_item.name).to eq('X-Burger')
-        expect(menu_item.price).to eq(10.0)
+
+        aggregate_failures 'checking attributes' do
+          expect(menu_item.name).to eq('X-Burger')
+          expect(menu_item.price).to eq(10.0)
+        end
       end
 
       it 'does not add errors' do
@@ -81,11 +84,14 @@ RSpec.describe DataConversionTool::MenuImporter do
         }
       end
 
-      it 'creates all menu items' do
+      it 'creates all menu items with correct names' do
         import
         menu = restaurant.menus.find_by(name: 'Combo Menu')
-        expect(menu.menu_items.count).to eq(3)
-        expect(menu.menu_items.map(&:name)).to contain_exactly('Burger', 'Fries', 'Soda')
+
+        aggregate_failures 'menu item validations' do
+          expect(menu.menu_items.count).to eq(3)
+          expect(menu.menu_items.map(&:name)).to contain_exactly('Burger', 'Fries', 'Soda')
+        end
       end
     end
 
@@ -100,8 +106,10 @@ RSpec.describe DataConversionTool::MenuImporter do
       end
 
       it 'creates menu and associated item' do
-        expect { import }.to change(restaurant.menus, :count).by(1)
-        expect(created_records[:menus]).to eq(1)
+        aggregate_failures do
+          expect { import }.to change(restaurant.menus, :count).by(1)
+          expect(created_records[:menus]).to eq(1)
+        end
       end
     end
 
@@ -119,10 +127,12 @@ RSpec.describe DataConversionTool::MenuImporter do
       end
 
       it 'creates only the valid items' do
-        import
-        menu = restaurant.menus.find_by(name: 'Mixed Menu')
-        expect(menu.menu_items.count).to eq(1)
-        expect(menu.menu_items.first.name).to eq('Valid Item')
+        aggregate_failures do
+          import
+          menu = restaurant.menus.find_by(name: 'Mixed Menu')
+          expect(menu.menu_items.count).to eq(1)
+          expect(menu.menu_items.first.name).to eq('Valid Item')
+        end
       end
 
       it 'logs errors for the invalid items' do

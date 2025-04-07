@@ -57,7 +57,7 @@ RSpec.describe DataConversionTool::BaseImporter do
     context 'with valid JSON file' do
       let(:file_path) { Rails.root.join('spec/fixtures/files/restaurant_data.json') }
 
-      it 'returns a parsed hash' do
+      it 'returns a hash containing the restaurants key as an array' do
         parsed = described_class.parse_json(file_path)
         expect(parsed).to be_a(Hash)
         expect(parsed['restaurants']).to be_an(Array)
@@ -76,10 +76,13 @@ RSpec.describe DataConversionTool::BaseImporter do
       end
 
       it 'raises an error and logs it' do
-        expect(Rails.logger).to receive(:error).with(/JSON parsing failed/)
+        allow(Rails.logger).to receive(:error)
+
         expect do
           described_class.parse_json(file_path)
         end.to raise_error('Invalid JSON file')
+
+        expect(Rails.logger).to have_received(:error).with(/JSON parsing failed/)
       end
     end
   end
